@@ -110,7 +110,7 @@
             </div>
             
             <p id="msg-historial" class="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                Selecciona una fecha (hasta 1 año atrás) para ver cómo estuvo el clima ese día en Santa Rosa.
+                Selecciona una fecha (desde Enero de 2025) para ver cómo estuvo el clima ese día en Santa Rosa.
             </p>
             
             <!-- Contenedor del Gráfico Histórico -->
@@ -206,11 +206,10 @@
         const inputFecha = document.getElementById('fecha-historial');
         const fechaMax = new Date();
         fechaMax.setDate(fechaMax.getDate() - 5); 
-        const fechaMin = new Date();
-        fechaMin.setFullYear(fechaMin.getFullYear() - 1); 
 
         inputFecha.max = fechaMax.toISOString().split('T')[0];
-        inputFecha.min = fechaMin.toISOString().split('T')[0];
+        // Aquí establecemos explícitamente el tope mínimo a Enero del 2025
+        inputFecha.min = '2025-01-01'; 
         inputFecha.value = fechaMax.toISOString().split('T')[0]; 
 
         async function buscarDatosHistoricos() {
