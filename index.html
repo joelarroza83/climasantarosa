@@ -83,14 +83,12 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div class="card">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4"><i class="fas fa-chart-line mr-2"></i>Evolución Temperatura (Hoy)</h3>
-                <!-- Se agregó el contenedor con altura fija (h-72) para evitar el crecimiento infinito -->
                 <div class="relative h-72 w-full">
                     <canvas id="chartTemperatura"></canvas>
                 </div>
             </div>
             <div class="card">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4"><i class="fas fa-chart-area mr-2"></i>Humedad y Precipitaciones (Hoy)</h3>
-                <!-- Se agregó el contenedor con altura fija (h-72) para evitar el crecimiento infinito -->
                 <div class="relative h-72 w-full">
                     <canvas id="chartHumedad"></canvas>
                 </div>
@@ -110,7 +108,7 @@
             </div>
             
             <p id="msg-historial" class="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                Selecciona una fecha (desde Enero de 2025) para ver cómo estuvo el clima ese día en Santa Rosa.
+                Selecciona una fecha (desde Enero de 2025 hasta hoy) para ver cómo estuvo el clima ese día en Santa Rosa.
             </p>
             
             <!-- Contenedor del Gráfico Histórico -->
@@ -204,13 +202,14 @@
         // --- LÓGICA PARA EL HISTORIAL ---
         
         const inputFecha = document.getElementById('fecha-historial');
-        const fechaMax = new Date();
-        fechaMax.setDate(fechaMax.getDate() - 5); 
+        const fechaMax = new Date(); // Ahora el máximo es HOY
 
-        inputFecha.max = fechaMax.toISOString().split('T')[0];
-        // Aquí establecemos explícitamente el tope mínimo a Enero del 2025
+        // Convertir la fecha de hoy a formato YYYY-MM-DD para el calendario
+        const fechaMaxStr = fechaMax.getFullYear() + '-' + String(fechaMax.getMonth() + 1).padStart(2, '0') + '-' + String(fechaMax.getDate()).padStart(2, '0');
+
+        inputFecha.max = fechaMaxStr;
         inputFecha.min = '2025-01-01'; 
-        inputFecha.value = fechaMax.toISOString().split('T')[0]; 
+        inputFecha.value = fechaMaxStr; 
 
         async function buscarDatosHistoricos() {
             const fecha = inputFecha.value;
@@ -225,7 +224,19 @@
             
             const lat = -26.8667;
             const lon = -56.8500;
-            const urlHistorica = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${fecha}&end_date=${fecha}&hourly=temperature_2m,relative_humidity_2m,rain&timezone=America%2FAsuncion`;
+            
+            // Lógica inteligente: Si la fecha es de los últimos 15 días (incluyendo hoy), usamos la API rápida reciente.
+            // Si es más antigua, usamos el archivo histórico a largo plazo.
+            const fechaSeleccionada = new Date(fecha);
+            const hoy = new Date();
+            const diferenciaDias = (hoy - fechaSeleccionada) / (1000 * 60 * 60 * 24);
+            
+            let baseUrl = "https://archive-api.open-meteo.com/v1/archive";
+            if (diferenciaDias <= 15) {
+                baseUrl = "https://api.open-meteo.com/v1/forecast";
+            }
+
+            const urlHistorica = `${baseUrl}?latitude=${lat}&longitude=${lon}&start_date=${fecha}&end_date=${fecha}&hourly=temperature_2m,relative_humidity_2m,rain&timezone=America%2FAsuncion`;
 
             try {
                 const response = await fetch(urlHistorica);
