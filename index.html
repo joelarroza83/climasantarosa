@@ -83,18 +83,24 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div class="card">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4"><i class="fas fa-chart-line mr-2"></i>Evolución Temperatura (Hoy)</h3>
-                <canvas id="chartTemperatura"></canvas>
+                <!-- Se agregó el contenedor con altura fija (h-72) para evitar el crecimiento infinito -->
+                <div class="relative h-72 w-full">
+                    <canvas id="chartTemperatura"></canvas>
+                </div>
             </div>
             <div class="card">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4"><i class="fas fa-chart-area mr-2"></i>Humedad y Precipitaciones (Hoy)</h3>
-                <canvas id="chartHumedad"></canvas>
+                <!-- Se agregó el contenedor con altura fija (h-72) para evitar el crecimiento infinito -->
+                <div class="relative h-72 w-full">
+                    <canvas id="chartHumedad"></canvas>
+                </div>
             </div>
         </div>
 
-        <!-- NUEVA SECCIÓN: Buscador Histórico -->
+        <!-- SECCIÓN: Buscador Histórico -->
         <div class="card mb-8 border-t-4 border-indigo-500">
             <div class="flex flex-col md:flex-row justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-gray-800"><i class="fas fa-history mr-2 text-indigo-500"></i>Máquina del Tiempo (Historial)</h3>
+                <h3 class="text-xl font-bold text-gray-800"><i class="fas fa-history mr-2 text-indigo-500"></i>Datos Históricos</h3>
                 <div class="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0 w-full md:w-auto">
                     <input type="date" id="fecha-historial" class="border-2 border-gray-300 rounded-lg p-2 text-gray-700 focus:border-indigo-500 outline-none w-full sm:w-auto">
                     <button onclick="buscarDatosHistoricos()" class="bg-indigo-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-indigo-700 transition shadow-md w-full sm:w-auto">
@@ -125,7 +131,7 @@
             return date.getHours().toString().padStart(2, '0') + ':00';
         }
 
-        // --- LÓGICA PARA LOS DATOS ACTUALES (Desde tu Python) ---
+        // --- LÓGICA PARA LOS DATOS ACTUALES ---
         async function cargarDatos() {
             let data;
             try {
@@ -195,21 +201,18 @@
             });
         }
 
-        // --- LÓGICA PARA EL HISTORIAL (Nuevo) ---
+        // --- LÓGICA PARA EL HISTORIAL ---
         
-        // 1. Configurar los límites del calendario (hasta 1 año atrás, máximo hace 5 días)
-        // La API de archivo de Open-Meteo consolida los datos con unos días de retraso.
         const inputFecha = document.getElementById('fecha-historial');
         const fechaMax = new Date();
-        fechaMax.setDate(fechaMax.getDate() - 5); // Máximo hace 5 días
+        fechaMax.setDate(fechaMax.getDate() - 5); 
         const fechaMin = new Date();
-        fechaMin.setFullYear(fechaMin.getFullYear() - 1); // Mínimo 1 año atrás
+        fechaMin.setFullYear(fechaMin.getFullYear() - 1); 
 
         inputFecha.max = fechaMax.toISOString().split('T')[0];
         inputFecha.min = fechaMin.toISOString().split('T')[0];
-        inputFecha.value = fechaMax.toISOString().split('T')[0]; // Valor por defecto
+        inputFecha.value = fechaMax.toISOString().split('T')[0]; 
 
-        // 2. Función para buscar en la API de Archivo
         async function buscarDatosHistoricos() {
             const fecha = inputFecha.value;
             const msgEl = document.getElementById('msg-historial');
@@ -221,10 +224,8 @@
 
             msgEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Viajando en el tiempo para buscar los datos...';
             
-            // Coordenadas de Santa Rosa
             const lat = -26.8667;
             const lon = -56.8500;
-            // Endpoint especial de Open-Meteo para datos históricos
             const urlHistorica = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${fecha}&end_date=${fecha}&hourly=temperature_2m,relative_humidity_2m,rain&timezone=America%2FAsuncion`;
 
             try {
@@ -234,7 +235,6 @@
 
                 renderizarGraficoHistorico(data.hourly, fecha);
                 
-                // Formatear fecha para el mensaje
                 const [year, month, day] = fecha.split('-');
                 msgEl.innerHTML = `<i class="fas fa-check-circle text-green-500 mr-2"></i> <b>Mostrando registros meteorológicos del ${day}/${month}/${year}</b>`;
                 
@@ -244,7 +244,6 @@
             }
         }
 
-        // 3. Dibujar el gráfico histórico
         function renderizarGraficoHistorico(hourlyData, fecha) {
             const etiquetas = hourlyData.time.map(formatearHora);
             
@@ -259,7 +258,7 @@
                         {
                             label: 'Temperatura (°C)',
                             data: hourlyData.temperature_2m,
-                            borderColor: 'rgb(239, 68, 68)', // Rojo
+                            borderColor: 'rgb(239, 68, 68)',
                             yAxisID: 'y',
                             tension: 0.3,
                             borderWidth: 3
@@ -267,7 +266,7 @@
                         {
                             label: 'Humedad (%)',
                             data: hourlyData.relative_humidity_2m,
-                            borderColor: 'rgb(59, 130, 246)', // Azul
+                            borderColor: 'rgb(59, 130, 246)',
                             yAxisID: 'y',
                             tension: 0.3,
                             borderDash: [5, 5],
@@ -276,7 +275,7 @@
                         {
                             label: 'Lluvia (mm)',
                             data: hourlyData.rain,
-                            backgroundColor: 'rgba(6, 182, 212, 0.7)', // Cyan
+                            backgroundColor: 'rgba(6, 182, 212, 0.7)',
                             type: 'bar',
                             yAxisID: 'y1'
                         }
@@ -304,11 +303,9 @@
             });
         }
 
-        // Iniciar
         cargarDatos();
-        // Mostrar datos históricos por defecto al cargar la página
         setTimeout(buscarDatosHistoricos, 1000); 
-        setInterval(cargarDatos, 60000); // Recarga automática de los datos de hoy
+        setInterval(cargarDatos, 60000); 
     </script>
 </body>
 </html>
