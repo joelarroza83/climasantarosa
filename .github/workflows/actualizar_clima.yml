@@ -2,7 +2,7 @@ name: Actualizar Clima Santa Rosa
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # Se ejecuta cada 15 minutos
+    - cron: '*/5 * * * *' # Se ejecuta cada 15 minutos
   workflow_dispatch: # Permite ejecutarlo manualmente
 
 permissions:
