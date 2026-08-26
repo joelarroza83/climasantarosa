@@ -1,14 +1,14 @@
 {
     "ciudad": "Santa Rosa, Misiones",
-    "fecha_actualizacion": "26/08/2026 11:01:52",
+    "fecha_actualizacion": "26/08/2026 11:38:26",
     "actual": {
-        "temperatura": 17.2,
-        "humedad": 86,
-        "viento_velocidad": 15.5,
+        "temperatura": 18.2,
+        "humedad": 84,
+        "viento_velocidad": 15.9,
         "viento_direccion": 42,
         "lluvia": 0.0,
         "presion": 994.0,
-        "uv": 0.5
+        "uv": 1.15
     },
     "historial": {
         "horas": [
